@@ -52,6 +52,8 @@ export interface WeeklyPlanItem {
   focusArea: string;
   hoursAllocated: number;
   topics: string[];
+  practiceTask?: string;
+  resources?: string[];
   milestone: string;
   deliverable: string;
 }

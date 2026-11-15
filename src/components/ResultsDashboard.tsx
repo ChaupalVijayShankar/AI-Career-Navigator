@@ -479,12 +479,24 @@ export function ResultsDashboard({
                 </div>
 
                 <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+                  {week.practiceTask && (
+                    <p className="text-slate-700 dark:text-slate-300">
+                      <span className="font-semibold text-[#0A192F] dark:text-white">Hands-On Practice:</span>{' '}
+                      {week.practiceTask}
+                    </p>
+                  )}
                   <p className="text-slate-700 dark:text-slate-300">
                     <span className="font-semibold text-[#0A192F] dark:text-white">Milestone:</span> {week.milestone}
                   </p>
                   <p className="text-slate-700 dark:text-slate-300">
                     <span className="font-semibold text-sky-700 dark:text-sky-400">Deliverable:</span> {week.deliverable}
                   </p>
+                  {week.resources && week.resources.length > 0 && (
+                    <p className="pt-1 text-slate-600 dark:text-slate-400">
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">Study Resources:</span>{' '}
+                      {week.resources.join(' · ')}
+                    </p>
+                  )}
                 </div>
               </motion.article>
             );

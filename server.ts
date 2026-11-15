@@ -88,12 +88,22 @@ const roadmapResponseSchema = {
           hoursAllocated: { type: Type.INTEGER },
           topics: {
             type: Type.ARRAY,
+            description: '4 to 6 specific, detailed study topics for this week.',
+            items: { type: Type.STRING },
+          },
+          practiceTask: {
+            type: Type.STRING,
+            description: 'Concrete hands-on coding, lab, or practical exercise for this week.',
+          },
+          resources: {
+            type: Type.ARRAY,
+            description: '2 to 3 recommended study resources, official docs, or focused guides.',
             items: { type: Type.STRING },
           },
           milestone: { type: Type.STRING },
           deliverable: { type: Type.STRING },
         },
-        required: ['week', 'title', 'focusArea', 'hoursAllocated', 'topics', 'milestone', 'deliverable'],
+        required: ['week', 'title', 'focusArea', 'hoursAllocated', 'topics', 'practiceTask', 'resources', 'milestone', 'deliverable'],
       },
     },
     projects: {
@@ -154,7 +164,7 @@ async function generateWithRetry(ai: GoogleGenAI, prompt: string, maxRetries = 2
         contents: prompt,
         config: {
           systemInstruction:
-            'You are a senior technical career strategist and curriculum architect. Produce realistic, concrete, industry-aligned skill gap evaluations and 8-week learning plans. Tailor study depth strictly to the user\'s weekly study hours, current skills, experience level, and career goal. Always provide exactly 8 weeks in weeklyRoadmap (numbered 1 through 8), exactly 3 practical projects in projects, and exactly 5 career tips in careerTips. Never hallucinate proficiency the user did not list.',
+            'You are a senior technical career strategist and curriculum architect. Produce thorough, deeply detailed, industry-aligned skill gap evaluations and 8-week learning plans. Tailor study depth strictly to the user\'s weekly study hours, current skills, experience level, and career goal. Include 4 to 6 specific sub-topics, a concrete hands-on practiceTask, and 2 to 3 recommended study resources for every single week. Always provide exactly 8 weeks in weeklyRoadmap (numbered 1 through 8), exactly 3 comprehensive practical projects in projects, and exactly 5 detailed career tips in careerTips. Never hallucinate proficiency the user did not list.',
           responseMimeType: 'application/json',
           responseSchema: roadmapResponseSchema,
         },
@@ -270,9 +280,9 @@ async function startServer() {
         `2. Group and evaluate their existingSkills (only skills grounded in what they listed or directly implied foundational sub-skills).`,
         `3. Identify key missingSkills with priority ("Critical", "High", or "Moderate") and clear reasoning.`,
         `4. Recommend high-leverage recommendedSkills with realistic estimatedHours.`,
-        `5. Design an actionable 8-week roadmap (Week 1 to Week 8) where each week's hoursAllocated aligns with ~${Math.round(hoursPerWeek)} hours/week and culminates in concrete milestones and deliverables.`,
-        `6. Recommend exactly 3 practical, portfolio-ready projects that directly exercise the missing and recommended skills.`,
-        `7. Provide exactly 5 actionable career improvement tips covering portfolio, networking, interviews, and technical execution.`,
+        `5. Design a comprehensive, actionable 8-week roadmap (Week 1 to Week 8) where each week's hoursAllocated aligns with ~${Math.round(hoursPerWeek)} hours/week, listing 4-6 detailed topics, a hands-on practiceTask, 2-3 study resources, a clear milestone, and a tangible deliverable.`,
+        `6. Recommend exactly 3 practical, portfolio-ready projects with thorough implementation descriptions that directly exercise the missing and recommended skills.`,
+        `7. Provide exactly 5 detailed, actionable career improvement tips covering portfolio, networking, interviews, and technical execution.`,
       ].join('\n');
 
       const response = await generateWithRetry(ai, prompt);
@@ -298,6 +308,8 @@ async function startServer() {
             focusArea: String(w.focusArea || effectiveRole),
             hoursAllocated: Math.max(1, Math.round(Number(w.hoursAllocated) || hoursPerWeek)),
             topics: Array.isArray(w.topics) ? w.topics.map((t) => String(t)) : [],
+            practiceTask: w.practiceTask ? String(w.practiceTask) : '',
+            resources: Array.isArray(w.resources) ? w.resources.map((r) => String(r)) : [],
             milestone: String(w.milestone || ''),
             deliverable: String(w.deliverable || ''),
           }))
@@ -454,7 +466,7 @@ async function startServer() {
         `Student Career Context: ${roadmapSummary}`,
         recentHistory ? `\nRecent Conversation:\n${recentHistory}` : '',
         `\nStudent Question: ${question}`,
-        `\nProvide a concise, practical, actionable response (under 180 words) using clear bullet points or short paragraphs tailored to their career path.`,
+        `\nProvide a thorough, practical, actionable response using clear bullet points or short paragraphs tailored to their career path.`,
       ]
         .filter(Boolean)
         .join('\n');
